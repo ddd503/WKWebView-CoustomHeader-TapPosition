@@ -65,11 +65,12 @@ class CustomHeaderView: UIView {
             return
         }
         
+        // viewの変更をメインスレッドで行う
+        // viewを変更するとcontrollerのviewDidLayoutSubviewsが走る
         DispatchQueue.main.async {
             if cursor == "↑" {
                 self.blueView.isHidden = true
                 self.cursorButton.setTitle("↓", for: .normal)
-                self.delegate?.setHeaderPosition()
             } else {
                 if #available(iOS 10.0, *) {
                     self.blueView.isHidden = false
@@ -79,7 +80,6 @@ class CustomHeaderView: UIView {
                 }
                 
                 self.cursorButton.setTitle("↑", for: .normal)
-                self.delegate?.setHeaderPosition()
             }
         }
     }

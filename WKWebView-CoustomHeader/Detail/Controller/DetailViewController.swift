@@ -45,8 +45,6 @@ class DetailViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // WebViewのautolayoutの設定
-        self.setupConstain(webView: self.webView)
         
         // headerViewのサイズ設定（header内情報が確定したタイミングで）
         self.setHeaderPosition()
@@ -65,6 +63,8 @@ class DetailViewController: UIViewController {
         self.webView = CustomWebView(frame: .zero, configuration: setupConfiguration())
         self.webView?.delegate = self
         self.baseView.addSubview(self.webView ?? WKWebView())
+        // WebViewのautolayoutの設定
+        self.setupConstain(webView: self.webView)
         
         guard !self.accessURL.isEmpty else {
             print("アクセスURLが見つかりません。")
@@ -138,6 +138,7 @@ extension DetailViewController: CustomWebViewDelegate {
 extension DetailViewController: CustomHeaderViewDelegate {
     
     func setHeaderPosition() {
+         // 最新のサイズを取得
         self.headerView?.setNeedsLayout()
         let size = self.headerView?.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
         let headerHeight = size?.height ?? 0
@@ -145,18 +146,19 @@ extension DetailViewController: CustomHeaderViewDelegate {
         // headerの高さを決定（view内の情報が決定後、幅は変わらない）
         self.headerView?.frame.size.height = headerHeight
         
+        // headerの生成位置調整
+        self.headerView?.frame.origin.y = -headerHeight
+        
         // スクロールView内のHeaderViewの画面下に位置しているViewの配置を変更
         if let baseView = self.webView?.scrollView.subviews[0] {
-            baseView.frame.origin.y = headerHeight
+            baseView.frame.origin.y = 0
         }
         
-        // ずらしたbaseview分、下にinsetを拡張している
-        self.webView?.scrollView.contentInset = UIEdgeInsetsMake(0, 0, headerHeight, 0)
-        // ここを変えるとスクロールバーが下まで行かない
-//        self.webView?.scrollView.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, headerHeight, 0)
+        // inset調整
+        self.webView?.scrollView.contentInset = UIEdgeInsetsMake(headerHeight, 0, 0, 0)
         
-//        self.webView?.scrollView.setContentOffset(CGPoint(x: 0, y: -headerHeight), animated: false)
-        self.headerView?.reloadInputViews()
+        // scrollviewの開始位置を調整
+        self.webView?.scrollView.setContentOffset(CGPoint(x: 0, y: -headerHeight), animated: false)
 
     }
     
